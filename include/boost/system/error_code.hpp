@@ -14,7 +14,6 @@
 #include <boost/system/detail/config.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/config.hpp>
-#include <stdio.h>
 #include <ostream>
 #include <string>
 #include <functional>
@@ -156,6 +155,10 @@ template<> struct is_error_condition_enum<errc::errc_t>
 };
 
 // class error_category
+#if ( defined( BOOST_GCC ) && BOOST_GCC >= 40600 ) || defined( BOOST_CLANG )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#endif
 
 #ifdef BOOST_MSVC
 #pragma warning( push )
@@ -314,6 +317,10 @@ public:
 };
 
 } // namespace detail
+
+#if ( defined( BOOST_GCC ) && BOOST_GCC >= 40600 ) || defined( BOOST_CLANG )
+#pragma GCC diagnostic pop
+#endif
 
 // generic_category(), system_category()
 
@@ -500,7 +507,7 @@ public:
 
     BOOST_SYSTEM_CONSTEXPR explicit operator bool() const BOOST_NOEXCEPT  // true if error
     {
-        return failed_;
+        return val_ != 0;
     }
 
 #else
@@ -510,12 +517,12 @@ public:
 
     BOOST_SYSTEM_CONSTEXPR operator unspecified_bool_type() const BOOST_NOEXCEPT  // true if error
     {
-        return failed_? unspecified_bool_true: 0;
+        return val_ != 0? unspecified_bool_true: 0;
     }
 
     BOOST_SYSTEM_CONSTEXPR bool operator!() const BOOST_NOEXCEPT  // true if no error
     {
-        return !failed_;
+        return val_ == 0;
     }
 
 #endif
@@ -641,7 +648,7 @@ public:
 
     BOOST_SYSTEM_CONSTEXPR explicit operator bool() const BOOST_NOEXCEPT  // true if error
     {
-        return failed_;
+        return val_ != 0;
     }
 
 #else
@@ -651,12 +658,12 @@ public:
 
     BOOST_SYSTEM_CONSTEXPR operator unspecified_bool_type() const  BOOST_NOEXCEPT // true if error
     {
-        return failed_? unspecified_bool_true: 0;
+        return val_ != 0? unspecified_bool_true: 0;
     }
 
     BOOST_SYSTEM_CONSTEXPR bool operator!() const BOOST_NOEXCEPT // true if no error
     {
-        return !failed_;
+        return val_ == 0;
     }
 
 #endif
